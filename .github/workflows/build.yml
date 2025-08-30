@@ -1,0 +1,34 @@
+name: Haskell CI
+
+on:
+  push:
+    branches: [ "master" ]
+  pull_request:
+    branches: [ "master" ]
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: windows-latest
+    needs: [test]
+    steps:
+    - uses: actions/checkout@v4
+    - uses: haskell-actions/setup@v2
+      with:
+        ghc-version: '9.8.4'
+        cabal-version: '3.12'
+    - name: Install dependencies
+      run: |
+        cabal update
+        cabal build --only-dependencies
+    - name: Build
+      run: cabal build
+    - name: Install
+      run: cabal install --installdir .
+    - uses: actions/upload-artifact@v4
+      with:
+        name: mktl-windows
+        path: |
+          mktl.exe
